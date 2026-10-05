@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void main() => runApp(const VidGenAIApp());
+void main() {
+  runApp(const VidGenAIApp());
+}
 
 class VidGenAIApp extends StatelessWidget {
   const VidGenAIApp({super.key});
@@ -31,7 +33,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _promptController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
-  
+
   bool _isRendering = false;
   String _statusMessage = "Enter story prompt to render video.";
   String _selectedStyle = "Cinematic 4K";
@@ -41,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleGenerate() async {
     String serverUrl = _urlController.text.trim();
     if (serverUrl.isEmpty) {
-      setState(() => _statusMessage = "પહેલાં ઉપર Server URL નાખો!");
+      setState(() => _statusMessage = "Please enter Server URL first!");
       return;
     }
     if (_promptController.text.trim().isEmpty) return;
@@ -52,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _isRendering = true;
-      _statusMessage = "AI Rendering Engine ચાલુ છે...\nઓડિયો અને સીન્સ પ્રોસેસ થઈ રહ્યા છે.";
+      _statusMessage = "AI Rendering Engine active...\nProcessing scenes and voiceover.";
     });
 
     try {
@@ -68,13 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         setState(() {
-          _statusMessage = "વિડિયો તૈયાર!\nલિંક: ${data['video_url']}";
+          _statusMessage = "Video Ready!\nLink: ${data['video_url']}";
         });
       } else {
-        setState(() => _statusMessage = "સર્વર એરર! ફરી પ્રયાસ કરો.");
+        setState(() => _statusMessage = "Server error! Try again.");
       }
     } catch (e) {
-      setState(() => _statusMessage = "કનેક્શન ફેલ! URL સાચો છે કે નહીં તે ચેક કરો.");
+      setState(() => _statusMessage = "Connection failed! Check Colab ngrok URL.");
     } finally {
       setState(() => _isRendering = false);
     }
@@ -97,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Server URL Input (તારે વારંવાર કોડિંગ ન કરવું પડે એટલા માટે)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -110,15 +111,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: const TextStyle(color: Colors.white, fontSize: 13),
                 decoration: const InputDecoration(
                   icon: Icon(Icons.link, color: Color(0xFFC084FC), size: 20),
-                  hintText: "Colab ngrok URL અહીં પેસ્ટ કરો",
+                  hintText: "Paste Colab ngrok URL here",
                   hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 12),
                   border: InputBorder.none,
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
-            // Prompt Box
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF161622),
@@ -130,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 5,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: const InputDecoration(
-                  hintText: "અહીં ૪ મિનિટની સ્ટોરી અથવા સીન લખો...",
+                  hintText: "Enter scene storyline, characters and prompt...",
                   hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 13),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(16),
@@ -138,8 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Visual Style Chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -163,8 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Generate Button
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -183,8 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Status Card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
