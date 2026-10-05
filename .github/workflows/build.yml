@@ -22,18 +22,46 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create Flutter Project
+      - name: Create Flutter Project & Configure
         run: |
           flutter create --org com.vidgenai --project-name vidgenai app
           cd app
           flutter pub add http
 
-      - name: Build APK
+          # એપનું નામ સિસ્ટમ માટે 'VidGenAI' સેટ કરવું
+          sed -i 's/android:label="vidgenai"/android:label="VidGenAI"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Copy App UI Code
+        run: |
+          if [ -f "lib/main.dart" ]; then
+            cp lib/main.dart app/lib/main.dart
+          fi
+
+      - name: Generate & Apply High-Res App Icon
+        run: |
+          sudo apt-get update && sudo apt-get install -y imagemagick
+          
+          # ૧૦૨૪x૧૦૨૪ સાઈઝનો પ્રીમિયમ નિયોન ગ્રેડિયન્ટ લોગો બનાવવો
+          convert -size 512x512 xc:'#0D0D12' \
+            -fill '#7C3AED' -draw 'roundrectangle 40,40,472,472,80,80' \
+            -fill '#C084FC' -draw 'circle 256,256,256,360' \
+            -fill '#FFFFFF' -pointsize 140 -weight Bold -gravity Center -annotate +0+0 'V' \
+            icon.png
+
+          # એન્ડ્રોઇડના તમામ સ્ક્રીન સાઈઝના ફોલ્ડર્સમાં આઇકોન રિપ્લેસ કરવો
+          for res in "mipmap-mdpi/48x48" "mipmap-hdpi/72x72" "mipmap-xhdpi/96x96" "mipmap-xxhdpi/144x144" "mipmap-xxxhdpi/192x192"; do
+            folder="app/android/app/src/main/res/${res%/*}"
+            size="${res#*/}"
+            mkdir -p "$folder"
+            convert icon.png -resize "$size" "$folder/ic_launcher.png"
+          done
+
+      - name: Build Release APK
         run: |
           cd app
           flutter build apk --release
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VidGenAI-Release-APK
